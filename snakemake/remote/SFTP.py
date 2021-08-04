@@ -3,6 +3,7 @@ __copyright__ = "Copyright 2015, Christopher Tomkins-Tinch"
 __email__ = "tomkinsc@broadinstitute.org"
 __license__ = "MIT"
 
+from base64 import b64decode
 import os
 
 # module-specific
@@ -12,6 +13,7 @@ from snakemake.utils import os_sync
 
 try:
     # third-party modules
+    import paramiko
     import pysftp
 except ImportError as e:
     raise WorkflowError(
@@ -32,8 +34,16 @@ class RemoteProvider(AbstractRemoteProvider):
         stay_on_remote=False,
         is_default=False,
         mkdir_remote=True,
+        known_host='',
         **kwargs
     ):
+        if known_host:
+            host, algorithm, key_base64 = known_host.split()
+            key = paramiko.PKey(data=b64decode(key_base64))
+            cnopts = pysftp.CnOpts()
+            cnopts.hostkeys.add(host, algorithm, key)
+            kwargs['cnopts'] = cnopts
+
         super(RemoteProvider, self).__init__(
             *args,
             keep_local=keep_local,
