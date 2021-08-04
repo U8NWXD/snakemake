@@ -576,6 +576,7 @@ def snakemake(
             attempt=attempt,
             default_remote_provider=_default_remote_provider,
             default_remote_prefix=default_remote_prefix,
+            default_remote_kwargs=default_remote_kwargs,
             run_local=run_local,
             default_resources=default_resources,
             cache=cache,

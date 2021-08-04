@@ -3,6 +3,7 @@ __copyright__ = "Copyright 2021, Johannes Köster"
 __email__ = "johannes.koester@uni-due.de"
 __license__ = "MIT"
 
+import json
 import os
 import sys
 import contextlib
@@ -80,12 +81,16 @@ class AbstractExecutor:
 
     def get_default_remote_provider_args(self):
         if self.workflow.default_remote_provider:
-            return (
-                " --default-remote-provider {} " "--default-remote-prefix {} "
+            s = (
+                " --default-remote-provider {} "
+                "--default-remote-prefix '{}' "
+                "--default-remote-kwargs '{}' "
             ).format(
                 self.workflow.default_remote_provider.__module__.split(".")[-1],
                 self.workflow.default_remote_prefix,
+                json.dumps(self.workflow.default_remote_kwargs)[1:-1],
             )
+            return s
         return ""
 
     def _format_key_value_args(self, flag, kwargs):
