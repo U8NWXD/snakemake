@@ -3,6 +3,7 @@ __copyright__ = "Copyright 2021, Johannes Köster"
 __email__ = "johannes.koester@uni-due.de"
 __license__ = "MIT"
 
+import json
 import os
 import subprocess
 import glob
@@ -163,6 +164,7 @@ def snakemake(
     precommand="",
     default_remote_provider=None,
     default_remote_prefix="",
+    default_remote_kwargs=None,
     tibanna_config=False,
     assume_shared_fs=True,
     cluster_status=None,
@@ -283,6 +285,7 @@ def snakemake(
         container_image (str):      Docker image to use, e.g., for kubernetes.
         default_remote_provider (str): default remote provider to use instead of local files (e.g. S3, GS)
         default_remote_prefix (str): prefix for default remote provider (e.g. name of the bucket).
+        default_remote_kwargs (dict): keyword arguments to pass to default remote provider
         tibanna (bool):             submit jobs to AWS cloud using Tibanna.
         tibanna_sfn (str):          Step function (Unicorn) name of Tibanna (e.g. tibanna_unicorn_monty). This must be deployed first using tibanna cli.
         google_lifesciences (bool): submit jobs to Google Cloud Life Sciences (pipelines API).
@@ -528,8 +531,9 @@ def snakemake(
             except ImportError as e:
                 raise WorkflowError("Unknown default remote provider.")
             if rmt.RemoteProvider.supports_default:
+                provider_kwargs = default_remote_kwargs or {}
                 _default_remote_provider = rmt.RemoteProvider(
-                    keep_local=True, is_default=True
+                    keep_local=True, is_default=True, **provider_kwargs
                 )
             else:
                 raise WorkflowError(
@@ -676,6 +680,7 @@ def snakemake(
                     conda_create_envs_only=conda_create_envs_only,
                     default_remote_provider=default_remote_provider,
                     default_remote_prefix=default_remote_prefix,
+                    default_remote_kwargs=default_remote_kwargs,
                     tibanna=tibanna,
                     tibanna_sfn=tibanna_sfn,
                     google_lifesciences=google_lifesciences,
@@ -1051,7 +1056,7 @@ def get_argument_parser(profile=None):
                         line options in YAML format. For example,
                         '--cluster qsub' becomes 'cluster: qsub' in the YAML
                         file. Profiles can be obtained from
-                        https://github.com/snakemake-profiles. 
+                        https://github.com/snakemake-profiles.
                         The profile can also be set via the environment variable $SNAKEMAKE_PROFILE.
                         """.format(
             dirs.site_config_dir, dirs.user_config_dir
@@ -1940,6 +1945,12 @@ def get_argument_parser(profile=None):
         "--default-remote-prefix",
         default="",
         help="Specify prefix for default remote provider. E.g. " "a bucket name.",
+    )
+    group_behavior.add_argument(
+        "--default-remote-kwargs",
+        type=json.loads,
+        help="JSON-formatted string of keyword arguments for remote "
+        "provider."
     )
     group_behavior.add_argument(
         "--no-shared-fs",
@@ -2855,6 +2866,7 @@ def main(argv=None):
             wrapper_prefix=args.wrapper_prefix,
             default_remote_provider=args.default_remote_provider,
             default_remote_prefix=args.default_remote_prefix,
+            default_remote_kwargs=args.default_remote_kwargs,
             assume_shared_fs=not args.no_shared_fs,
             cluster_status=args.cluster_status,
             export_cwl=args.export_cwl,
