@@ -1948,9 +1948,9 @@ def get_argument_parser(profile=None):
     )
     group_behavior.add_argument(
         "--default-remote-kwargs",
-        type=json.loads,
-        help="JSON-formatted string of keyword arguments for remote "
-        "provider."
+        type=lambda s: json.loads('{' + s + '}'),
+        help="JSON-formatted string (without braces) of keyword "
+        "arguments for remote provider."
     )
     group_behavior.add_argument(
         "--no-shared-fs",
