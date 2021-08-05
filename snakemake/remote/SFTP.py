@@ -3,7 +3,6 @@ __copyright__ = "Copyright 2015, Christopher Tomkins-Tinch"
 __email__ = "tomkinsc@broadinstitute.org"
 __license__ = "MIT"
 
-from base64 import b64decode
 import os
 
 # module-specific
@@ -38,8 +37,9 @@ class RemoteProvider(AbstractRemoteProvider):
         **kwargs
     ):
         if known_host:
-            host, algorithm, key_base64 = known_host.split()
-            key = paramiko.PKey(data=b64decode(key_base64))
+            entry = paramiko.hostkeys.HostKeyEntry.from_line(known_host)
+            host, algorithm, _ = known_host.split()
+            key = entry.key
             cnopts = pysftp.CnOpts()
             cnopts.hostkeys.add(host, algorithm, key)
             kwargs['cnopts'] = cnopts
