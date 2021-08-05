@@ -520,6 +520,8 @@ def snakemake(
 
     logger.setup_logfile()
 
+    default_remote_kwargs = default_remote_kwargs or {}
+
     try:
         # handle default remote provider
         _default_remote_provider = None
@@ -531,9 +533,9 @@ def snakemake(
             except ImportError as e:
                 raise WorkflowError("Unknown default remote provider.")
             if rmt.RemoteProvider.supports_default:
-                provider_kwargs = default_remote_kwargs or {}
                 _default_remote_provider = rmt.RemoteProvider(
-                    keep_local=True, is_default=True, **provider_kwargs
+                    keep_local=True, is_default=True,
+                    **default_remote_kwargs,
                 )
             else:
                 raise WorkflowError(

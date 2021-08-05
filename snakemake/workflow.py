@@ -120,7 +120,7 @@ class Workflow:
         attempt=1,
         default_remote_provider=None,
         default_remote_prefix="",
-        default_remote_kwargs="",
+        default_remote_kwargs=None,
         run_local=True,
         default_resources=None,
         cache=None,
@@ -196,7 +196,7 @@ class Workflow:
         self.restart_times = restart_times
         self.attempt = attempt
         self.default_remote_provider = default_remote_provider
-        self.default_remote_prefix = default_remote_prefix
+        self.default_remote_prefix = default_remote_prefix or {}
         self.default_remote_kwargs = default_remote_kwargs
         self.configfiles = []
         self.run_local = run_local
